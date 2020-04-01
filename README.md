@@ -1,98 +1,121 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+#  **PID Controller** 
+## Udacity Self-Driving Car Nanodegree Project 8
 
----
 
-## Dependencies
+**The goals / steps of this project are the following:**
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+* xxx
 
-Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
+[//]: # (Image References)
 
-## Basic Build Instructions
+[image1]: ./images/way_points.png "way points"
+[image2]: ./images/result.png "result"
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
 
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
+###  Environment set up
 
-## Editor Settings
+The environment setting is the exactly same as previous three projects , I only need do the followings: 
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+* Clone project from Udacity's repo on Github
+```sh
+git clone https://github.com/udacity/CarND-PID-Control-Project
+```
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+* Edit the file of "main.cpp" and compile/build the excutalbe file to pass the simulator.
 
-## Code Style
+* Push project to my repo on Github and submit the project
+```sh
+git push https://github.com/guishengwang/Udacity-P8-PID-Controller
+```
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
 
-## Project Instructions and Rubric
+### Submission
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+File Name | Description
+----------|-----------
+main.cpp  | get data from simulator, plan the next path and send data to simulator
+README.md | summary of the project
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+ ![alt text][image2]
 
-## Hints!
+###  Highway map and way points
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
+The way point data is from the file of “highway_map.csv” read into variables as below, 
 
-## Call for IDE Profiles Pull Requests
+No. | map_waypoints_x | map_waypoints_y | map_waypoints_s | map_waypoints_dx | map_waypoints_dy
+----------|-----------|-----------|-----------|-----------|-----------
+1 | 784.6001 | 1135.571 | 0 | -0.02359831 | -0.9997216
+2 | 815.2679 | 1134.93 | 30.6744785308838 | -0.01099479 | -0.9999396
+3 | 844.6398 | 1134.911 | 60.0463714599609 | -0.002048373 | -0.9999979
+… |… |… |… | … | …
+180 | 711.2 | 1143.5 | 6871.54959487915 | -0.2637061 | -0.9646032
+181 | 753.2067 | 1136.417 | 6914.14925765991 | -0.107399 | -0.9942161
 
-Help your fellow students!
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
+The waypoints are in the middle of the double-yellow dividing line.
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+ ![alt text][image1]
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
+Track is 6945.554 meters (4.32 mile) long  / 181 way points , around 38 meters apart   
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
+Speed limit is 50 MPH  or 22.35 m/s,  it will take 310.7 second ( 5.18 minutes ) to finish one loop
 
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+Each Lane 4 meters wide / 3 lanes on each direction
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+
+
+### Sensor fusion data
+
+
+variable   | Description 
+----------|-----------
+sensor_fusion[0]| id ,a unique identifier for that car
+sensor_fusion[1]| x  ,global map coordinates
+sensor_fusion[2]| y  ,global map coordinates
+sensor_fusion[3]| vx ,velocity components
+sensor_fusion[4]| vy ,velocity components
+sensor_fusion[5]| s  ,Frenet coordinates
+sensor_fusion[6]| d  ,Frenet coordinates
+
+
+### Special note on unit of speed from simulator 
+
+The simulator provides both the ego car speed and other car's speed but these information are in differnt unit as below, 
+
+variable   | Description | Unit
+----------|-----------|-----------
+car_speed| the speed of ego car| MPH
+sensor_fusion[3]| vx ,velocity components | m/s
+sensor_fusion[4]| vx ,velocity components | m/s
+
+When the code gets the speed of other cars as below
+```sh
+    double other_vx=sensor_fusion[i][3];
+    double other_vy=sensor_fusion[i][4];
+    double other_speed=sqrt(other_vx*other_vx+other_vy*other_vy);
+```
+The speed of other car will be in the unit of m/s, a conversion of the ego car speed to the same unit is necessary before being compared with other cars. This is very important step, at the begining, even after I have set up flag for safely changing lane after comparing speed of ego car and other car around, collisons still happened. Finally I realized the difference of the unit of speed between ego car and other ars and fixed the problem.
+
+
+### Strategy to prevent collisons
+
+The walk through video had demonstrated how to reduce speed of ego car if there was a car ahead in 30 meters to prevent collison. The chance of collison druing lane changing also need to be eliminated. The code will collect the speed and location of other cars around ego car and make desicion if it is safe to change lane or not. 
+
+At the same time, I do not want the ego car to reduce the speed too much which might cause collison with fast car behind and/or lost the chance to over take other cars in other lane. So I upgraded the orginal code from walk through to make the ego car to adjust speed not only based on distance but also the speed difference with other cars.  
+
+### Strategy to change lane and over take other cars
+
+According to the walk through, the car will brake or reduce the speed when the distance to the car ahead is less than 30 meters while our target is to keep the ego car running as fast as the speed limit, so it'd better make the ego car running in a lane with less car ahead of it. The code will detect the distance between the car ahead and the ego car, if there is no car in 100 meters ahead in other lane but a car in 50 meters ahead in the same lane, the ego car will change lane. This strategy works quite well, the ego car will change lane in advance and do not wait until it is too close to the car ahead. 
+
+
+
+## Discussion
+
+This is a very interesting project but at the beginning, I even didnot know where to start. My mentor suggested me to start with the walk through video which later I found out was extremely helpful. It was so exited to see the ego car to start moving, braking, chaning lane in the simultor. To make ego car to maneuver among other cars took me lots of thoughts and the class from Sebastian on path planning gave me a clue and I created a matrix for recording cars around the ego car within +150 and -30 meter range and also their speed. Apparently this method works quite well and my ego car could run though the highway to meet the requirement. There was lots of fun!!
+
+Many thanks to the Udacity team and my mentor. Looking forward to the next challenge!
+
+
+
 
