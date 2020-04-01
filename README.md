@@ -44,7 +44,7 @@ The way point data is from the file of “highway_map.csv” read into variables
 
 No. | map_waypoints_x | map_waypoints_y | map_waypoints_s | map_waypoints_dx | map_waypoints_dy
 ----------|-----------|-----------|-----------|-----------|-----------
-1 | 784.6001 | 1135.571 | 0 | -0.02359831 | -0.9997216
+1 | cte | 1135.571 | 0 | -0.02359831 | -0.9997216
 2 | 815.2679 | 1134.93 | 30.6744785308838 | -0.01099479 | -0.9999396
 3 | 844.6398 | 1134.911 | 60.0463714599609 | -0.002048373 | -0.9999979
 … |… |… |… | … | …
@@ -65,18 +65,15 @@ Each Lane 4 meters wide / 3 lanes on each direction
 
 
 
-### Sensor fusion data
+### Data from simulator
 
 
 variable   | Description 
 ----------|-----------
-sensor_fusion[0]| id ,a unique identifier for that car
-sensor_fusion[1]| x  ,global map coordinates
-sensor_fusion[2]| y  ,global map coordinates
-sensor_fusion[3]| vx ,velocity components
-sensor_fusion[4]| vy ,velocity components
-sensor_fusion[5]| s  ,Frenet coordinates
-sensor_fusion[6]| d  ,Frenet coordinates
+cte| id ,a unique identifier for that car
+speed| x  ,global map coordinates
+angle| steering angle
+
 
 
 ### Special note on unit of speed from simulator 

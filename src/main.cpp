@@ -8,6 +8,7 @@
 // for convenience
 using nlohmann::json;
 using std::string;
+using namespace std;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
@@ -78,13 +79,9 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           double steer_value;
-          /**
-           * TODO: Calculate steering value here, remember the steering value is
-           *   [-1, 1].
-           * NOTE: Feel free to play around with the throttle and speed.
-           *   Maybe use another PID controller to control the speed!
-           */
-                    
+          double throttle_value = 0.3;
+          json msgJson;
+                      
           if (twiddle == true){
             total_cte = total_cte + pow(cte,2);
             if(n==0){
@@ -104,7 +101,7 @@ int main() {
               //double sump = p[0]+p[1]+p[2];
               //std::cout << "sump: " << sump << " ";
               if(first == true) {
-                std::cout << "Intermediate p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
+                cout << "Intermediate p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
                 p[p_iterator] += dp[p_iterator];
                 //pid.Init(p[0], p[1], p[2]);
                 first = false;
@@ -190,16 +187,11 @@ int main() {
           } else { //twiddle if
             pid.UpdateError(cte);
             steer_value = pid.TotalError();
-
-            
+         
           
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-                    << std::endl;
-
-          json msgJson;
+          cout << "CTE: " << cte << " Steering Value: " << steer_value <<endl;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle_value;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
