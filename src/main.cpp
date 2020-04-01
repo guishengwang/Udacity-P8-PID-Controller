@@ -33,11 +33,7 @@ string hasData(string s) {
 
 int main() {
   uWS::Hub h;
-
   PID pid;
-  /**
-   * TODO: Initialize the pid variable.
-   */
   bool twiddle = false;
   double p[3] = {0.05, 0.0001, 1.5};
   double dp[3] = {.01, .0001, .1};
@@ -53,7 +49,7 @@ int main() {
   bool first = true;
   bool second = true;
   double best_p[3] = {p[0],p[1],p[2]};
-  if(twiddle == true) {
+  if(twiddle) {
     pid.Init(p[0],p[1],p[2]);
   }else {
     pid.Init(0.06, 0.00031, 1.29);
@@ -115,23 +111,23 @@ int main() {
                     best_p[2] = p[2];
                     dp[p_iterator] *= 1.1;
                     sub_move += 1;
-                    std::cout << "iteration: " << total_iterator << " ";
-                    std::cout << "p_iterator: " << p_iterator << " ";
-                    std::cout << "p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
-                    std::cout << "error: " << error << " ";
-                    std::cout << "best_error: " << best_error << " ";
-                    std::cout << "Best p[0] p[1] p[2]: " << best_p[0] << " " << best_p[1] << " " << best_p[2] << " ";
+                    cout << "iteration: " << total_iterator << " ";
+                    cout << "p_iterator: " << p_iterator << " ";
+                    cout << "p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
+                    cout << "error: " << error << " ";
+                    cout << "best_error: " << best_error << " ";
+                    cout << "Best p[0] p[1] p[2]: " << best_p[0] << " " << best_p[1] << " " << best_p[2] << " ";
                 }else{
                   //std::cout << "else: ";
                   if(second == true) {
-                    std::cout << "Intermediate p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
+                    cout << "Intermediate p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
                     p[p_iterator] -= 2 * dp[p_iterator];
                     //pid.Init(p[0], p[1], p[2]);
                     second = false;
                   }else {
-                    std::cout << "iteration: " << total_iterator << " ";
-                    std::cout << "p_iterator: " << p_iterator << " ";
-                    std::cout << "p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
+                    cout << "iteration: " << total_iterator << " ";
+                    cout << "p_iterator: " << p_iterator << " ";
+                    cout << "p[0] p[1] p[2]: " << p[0] << " " << p[1] << " " << p[2] << " ";
                     if(error < best_error) {
                         best_error = error;
                         best_p[0] = p[0];
@@ -144,9 +140,9 @@ int main() {
                         dp[p_iterator] *= 0.9;
                         sub_move += 1;
                     }
-                    std::cout << "error: " << error << " ";
-                    std::cout << "best_error: " << best_error << " ";
-                    std::cout << "Best p[0] p[1] p[2]: " << best_p[0] << " " << best_p[1] << " " << best_p[2] << " ";
+                    cout << "error: " << error << " ";
+                    cout << "best_error: " << best_error << " ";
+                    cout <<"Best p[0] p[1] p[2]:" << best_p[0] << " " << best_p[1] << " " << best_p[2] << " ";
                   }
                 }
                 
@@ -187,14 +183,13 @@ int main() {
           } else { //twiddle if
             pid.UpdateError(cte);
             steer_value = pid.TotalError();
-         
-          
-          cout << "CTE: " << cte << " Steering Value: " << steer_value <<endl;
-          msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = throttle_value;
-          auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
-          ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+            cout << "CTE: " << cte << " Steering Value: " << steer_value <<endl;
+            msgJson["steering_angle"] = steer_value;
+            msgJson["throttle"] = throttle_value;
+            auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+            std::cout << msg << std::endl;
+            ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          }
         }  // end "telemetry" if
       } else {
         // Manual driving
