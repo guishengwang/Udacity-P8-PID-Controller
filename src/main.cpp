@@ -52,7 +52,7 @@ int main() {
   double tol = 0.000015;
   double best_p[3] = {0.13,0.00027,3.05}; // result from twiddle
   double total_cte = 0.0;
-  double best_error =0.0;
+  int tw =0; // condition of last twiddle condition
   int i_switch=0;
   int i_PID=0; // 0 (P), 1(I) , 2(D) 
   int steps_per_it;
@@ -93,7 +93,7 @@ int main() {
     f<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<endl;
   }
 
-  h.onMessage([&i_switch,&i_PID,&it, &n_step,&steps_per_it,&f, &pid, &p, &dp, &n, &max_n, &tol, &error, &best_error, &p_iterator, &total_iterator, &total_cte, &first, &sub_move, &second, &twiddle, &i_twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  h.onMessage([&tw, &i_switch,&i_PID,&it, &n_step,&steps_per_it,&f, &pid, &p, &dp, &n, &max_n, &tol, &error, &p_iterator, &total_iterator, &total_cte, &first, &sub_move, &second, &twiddle, &i_twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -128,7 +128,7 @@ int main() {
                   f<<"finished 1st Iteration and the set best_err to total_cte="<<total_cte<<endl;
                 }
                 else {  // from second iteration, it>=1
-                    pid.twiddle();
+                    tw=pid.twiddle(tw,total_cte);
                     cout<<"called pid.twiddle()"<<endl;
                     p[0]=pid.getKp();
                     p[1]=pid.getKi();
@@ -141,7 +141,7 @@ int main() {
                 total_cte=0;
                 n_step=0;
               }
-              cout <<"twiddling..iternation="<<it<<"PID= ("<<p[0]<<","<<p[1]<<","<<p[2]<<" ) dp= (";
+              cout <<"twiddling...  iternation="<<it<<" PID= ("<<p[0]<<","<<p[1]<<","<<p[2]<<" ) dp= (";
               cout <<dp[0]<<","<<dp[1]<<","<<dp[2]<<" )"<<endl;
             }
             else {
@@ -151,6 +151,12 @@ int main() {
             n_step+=1;
             pid.UpdateError(cte);
             steer_value = pid.TotalError();
+            if (steer_value>0.4) {
+              steer_value=0.4;
+            }
+            else if (steer_value<-0.4){
+              steer_value=-0.4;
+            }
             msgJson["steering_angle"] = steer_value;
             msgJson["throttle"] = throttle_value;
             auto msg = "42[\"steer\"," + msgJson.dump() + "]";
