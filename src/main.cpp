@@ -75,12 +75,12 @@ int main() {
     cout<<"Optimaized PID from twiddle is (" <<best_p[0]<<","<<best_p[1]<<","<<best_p[2]<<" )"<< " and see how it works!"<< endl;
   }
   else if(i_twiddle==1){
-    
+
     pid.Init(p[0],p[1],p[2],dp[0],dp[1],dp[2]);
     cout<<"input how many steps (msg between c++ and simulator) to per each twiddle iteration (1850 steps per loop on the track)"<<endl;
     cin>>steps_per_it;
     cout<<"start twiddle from PID (" <<p[0]<<","<<p[1]<<","<<p[2]<<" )"<< " and "<<steps_per_it<<" steps per each iteration!"<< endl;
-      
+
   }else if(i_twiddle==2){
     cout <<"running  with  fixed PID, please input P="<<endl;
     cin>>p_input;
@@ -117,14 +117,14 @@ int main() {
           json msgJson;
 
           if (i_twiddle ==1){
-          
+
             // twiddle magic 
             if ((dp[0]+dp[1]+dp[2])>tol) {
-            
+
               if (n_step==steps_per_it) { //finish one iteration
-                
+
                 if (it==0) { // finish the first iteration, it=0
-                  best_err=total_cte;
+                  best_error=total_cte;
                   f<<"finished 1st Iteration and the set best_err to total_cte="<<total_cte<<endl;
                 }
                 else {  // from second iteration, it>=1
@@ -145,7 +145,7 @@ int main() {
               cout <<dp[0]<<","<<dp[1]<<","<<dp[2]<<" )"<<endl;
             }
             else {
-              cout<<"Twiddle finished and the best PID is ("<<p[0]<<","<<p[1]<<","<<p[2]<<" )"<<" Please record it" <<end;
+              cout<<"Twiddle finished and the best PID is ("<<p[0]<<","<<p[1]<<","<<p[2]<<" )"<<" Please record it" <<endl;
             }
 
             n_step+=1;
@@ -155,8 +155,8 @@ int main() {
             msgJson["throttle"] = throttle_value;
             auto msg = "42[\"steer\"," + msgJson.dump() + "]";
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-          
-          } else if (i_twiddle==0 || i_twiddle==2) { 
+
+          } else if (i_twiddle==0 || i_twiddle==2) {
             pid.UpdateError(cte);
             //i_step+=1;  to find out how many steps per loop
             //cout<<"i_step="<<i_step;

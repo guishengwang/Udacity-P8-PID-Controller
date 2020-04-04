@@ -60,6 +60,10 @@ class PID {
   double dp;
   double di;
   double dd;
+  double p[3];
+  dobule dp[3];
+  
+  int i_PID;
   
 };
 
