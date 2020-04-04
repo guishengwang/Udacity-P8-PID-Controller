@@ -70,10 +70,21 @@ Each Lane 4 meters wide / 3 lanes on each direction
 
 variable   | Description 
 ----------|-----------
-cte| id ,a unique identifier for that car
-speed| x  ,global map coordinates
-angle| steering angle
+cte| Cross Track Error
+speed| vehicle speed,  MPH
+angle| vehicle steering angle
 
+### Steering angle bais to right side.
+
+Steer_value   | angle showed on simulator | angle from simulator to main.cpp 
+----------|-----------|-----------
+0 | 0.44 |0.4363
+0.2|0.44 |5.4363
+-0.2|-4.56|-4.5637
+1.0| 25 | 25
+1.1| 25 | 25
+
+The steering angle of the simulator vehicle has a bias to the right side with 0.4363 degree and the maximum steering degree is +-25.
 
 
 ### Special note on unit of speed from simulator 

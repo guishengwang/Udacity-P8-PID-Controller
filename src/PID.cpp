@@ -32,3 +32,22 @@ double PID::TotalError() {
   return (-Kp * p_error) - (Ki * i_error) - (Kd * d_error);
 
 }
+
+double PID::getKp() {
+  return Kp;
+}
+double PID::getKi() {
+  return Ki;
+}
+double PID::getKd() {
+  return Kd;
+}
+double PID::get_p_error() {
+  return p_error;
+}
+double PID::get_i_error() {
+  return i_error;
+}
+double PID::get_d_error() {
+  return d_error;
+}

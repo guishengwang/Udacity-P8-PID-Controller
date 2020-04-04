@@ -1,6 +1,7 @@
 #include <math.h>
 #include <uWS/uWS.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "json.hpp"
 #include "PID.h"
@@ -49,14 +50,43 @@ int main() {
   bool first = true;
   bool second = true;
   double best_p[3] = {p[0],p[1],p[2]};
+  int i_twiddle; // 1 twiddle, 0 - run
+  double p_input;
+  double i_input;
+  double d_input;
+  ofstream f;
+  f.open("../output.txt");
+
+  cout<<"Please input '1' for twiddle or '0' for running"<<endl;
+  cin>>i_twiddle;
+  if (i_twiddle==1){
+    pid.Init(p[0],p[1],p[2]);
+    cout<<"start twiddle..."<<endl;
+  }else {
+    cout <<" running  with  fixed PID, please input P="<<endl;
+    cin>>p_input;
+    cout<<"please input I="<< endl;
+    cin>>i_input;
+    cout<<"Please input D="<<endl;
+    cin>>d_input;
+    pid.Init(p_input,i_input,d_input);
+    cout<<"Your input is P="<<p_input<<" I="<<i_input<<" D="<<d_input<<"... good luck!"<< endl;
+    //pid.Init(0.06, 0.00031, 1.29);
+    //pid.Init(0.05, 0.0001, 1.5);
+    //pid.Init(0.2,0.0003,3.0) //  or =-0.12, 0, -1.2  ; 0.12, 0,-2.7;
+  }
+
+
+  /*
   if(twiddle) {
     pid.Init(p[0],p[1],p[2]);
   }else {
     pid.Init(0.06, 0.00031, 1.29);
     //pid.Init(0.05, 0.0001, 1.5);
-  }
+    //pid.Init(0.2,0.0003,3.0) //  or =-0.12, 0, -1.2  ; 0.12, 0,-2.7;
+  }*/
 
-  h.onMessage([&pid, &p, &dp, &n, &max_n, &tol, &error, &best_error, &p_iterator, &total_iterator, &total_cte, &first, &sub_move, &second, &twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  h.onMessage([&f, &pid, &p, &dp, &n, &max_n, &tol, &error, &best_error, &p_iterator, &total_iterator, &total_cte, &first, &sub_move, &second, &twiddle, &i_twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -78,7 +108,7 @@ int main() {
           double throttle_value = 0.3;
           json msgJson;
                       
-          if (twiddle == true){
+          if (i_twiddle ==1){
             total_cte = total_cte + pow(cte,2);
             if(n==0){
               
@@ -171,23 +201,28 @@ int main() {
               } else {
                 std::string reset_msg = "42[\"reset\",{}]";
                 ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
+                cout <<"twiddle="<<twiddle<<" cte=" << cte << " Steering Value=" << steer_value<<" "<< reset_msg <<endl;
               }
-              
+
             } else {
               msgJson["steering_angle"] = steer_value;
               msgJson["throttle"] = throttle_value;
               auto msg = "42[\"steer\"," + msgJson.dump() + "]";
               ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+              cout <<"twiddle="<<twiddle<<" cte=" << cte << " Steering Value=" << steer_value<<" "<< msg <<endl;
+
             }
-           
-          } else { //twiddle if
+            
+          } else { //i_twiddle ==0
             pid.UpdateError(cte);
+            //f<<"pid.Kp, pid.Ki,pid.Kd,p_error,i_error,d_error  "<<endl;
+            //f<<pid.Kp<<","<<pid.Ki<<","<<pid.Kd<<","<<pid.p_error<<","<<pid.i_error<<","<<pid.d_error<<endl;
             steer_value = pid.TotalError();
-            cout << "CTE: " << cte << " Steering Value: " << steer_value <<endl;
-            msgJson["steering_angle"] = steer_value;
+            msgJson["steering_angle"] = 0.2; //steer_value;
             msgJson["throttle"] = throttle_value;
             auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-            std::cout << msg << std::endl;
+            cout <<"i_twiddle="<<i_twiddle<<" cte=" << cte << " Steering Value=" << steer_value;
+            cout<<" speed="<<speed<<" angle="<<angle<<"  "<< msg <<endl;
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
           }
         }  // end "telemetry" if
@@ -218,4 +253,5 @@ int main() {
   }
   
   h.run();
+  f.close();
 }

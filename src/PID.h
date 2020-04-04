@@ -30,6 +30,12 @@ class PID {
    * @output The total PID error
    */
   double TotalError();
+  double getKp();
+  double getKi();
+  double getKd();
+  double get_p_error();
+  double get_i_error();
+  double get_d_error();
 
  private:
   /**
