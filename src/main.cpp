@@ -33,31 +33,20 @@ string hasData(string s) {
 }
 
 int main() {
-  bool twiddle = false;
-  int n = 0;
-  int max_n = 600;
-  double error = 0.0;
-  int p_iterator = 0;
-  int total_iterator = 0;
-  int sub_move = 0;
-  bool first = true;
-  bool second = true;
- // double best_p[3] = {p[0],p[1],p[2]};
-
-
   uWS::Hub h;
   PID pid;
-  double p[3] = {0.15, 0.0005, 3}; //twiddle start point
-  double dp[3] = {0.00005,0.00005, 0.00005};
-  double tol = 0.000015;
-  double best_p[3] = {0.13,0.00027,3.05}; // result from twiddle
+  double p[3]  = {0.1199, 0.00002,  2.7}; //twiddle start point {0.15, 0.0005, 3}
+  double dp[3] = {0.005, 0.000002, 0.15};
+  double tol = 0.002;
+  double best_p[3] = {0.1199,0.00027, 3.0}; // result from twiddle
   double total_cte = 0.0;
   int tw =0; // condition of last twiddle condition
-  int i_switch=0;
   int i_PID=0; // 0 (P), 1(I) , 2(D) 
   int steps_per_it;
   int it=0;
-  int n_step;
+  int n_step=0;
+  int n_settle=100;
+  int reach_speed=0;
   //int i_step; // to find out how many step in a loop
   int i_twiddle; // 1 twiddle, 0 - run
   double p_input;
@@ -68,8 +57,9 @@ int main() {
   f<<"cte, pid.Kp, pid.Ki,pid.Kd,p_error,i_error,d_error  "<<endl;
 
 
-  cout<<"Please input '0'-Optimaized PID() '1'-twiddle or '2'-manual input PID"<<endl;
+  cout<<"Please input  '0' : run with Optimaized PID   '1': twiddle   '2' : input PID for manula trial"<<endl;
   cin>>i_twiddle;
+  //i_twiddle=0;
   if (i_twiddle==0){
     pid.Init(best_p[0],best_p[1],best_p[2],dp[0],dp[1],dp[2]);
     cout<<"Optimaized PID from twiddle is (" <<best_p[0]<<","<<best_p[1]<<","<<best_p[2]<<" )"<< " and see how it works!"<< endl;
@@ -93,7 +83,7 @@ int main() {
     f<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<endl;
   }
 
-  h.onMessage([&tw, &i_switch,&i_PID,&it, &n_step,&steps_per_it,&f, &pid, &p, &dp, &n, &max_n, &tol, &error, &p_iterator, &total_iterator, &total_cte, &first, &sub_move, &second, &twiddle, &i_twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  h.onMessage([&tw, &i_PID, &it, &n_settle, &n_step,&steps_per_it, &reach_speed, &f, &pid, &p, &dp,  &tol,  &total_cte, &i_twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -118,45 +108,53 @@ int main() {
 
           if (i_twiddle ==1){
 
-            // twiddle magic 
-            if ((dp[0]+dp[1]+dp[2])>tol) {
 
-              if (n_step==steps_per_it) { //finish one iteration
-
-                if (it==0) { // finish the first iteration, it=0
-                  best_error=total_cte;
-                  f<<"finished 1st Iteration and the set best_err to total_cte="<<total_cte<<endl;
-                }
-                else {  // from second iteration, it>=1
-                    tw=pid.twiddle(tw,total_cte);
-                    cout<<"called pid.twiddle()"<<endl;
-                    p[0]=pid.getKp();
-                    p[1]=pid.getKi();
-                    p[2]=pid.getKd();
-                    dp[0]=pid.getdp();
-                    dp[1]=pid.getdi();
-                    dp[2]=pid.getdd();
-                }
-                it+=1;
-                total_cte=0;
-                n_step=0;
-              }
-              cout <<"twiddling...  iternation="<<it<<" PID= ("<<p[0]<<","<<p[1]<<","<<p[2]<<" ) dp= (";
-              cout <<dp[0]<<","<<dp[1]<<","<<dp[2]<<" )"<<endl;
+	    if (speed>30){
+              reach_speed=1; // twiddle start after speed reach 30;
             }
             else {
-              cout<<"Twiddle finished and the best PID is ("<<p[0]<<","<<p[1]<<","<<p[2]<<" )"<<" Please record it" <<endl;
+              cout<<"twiddle will not start until speed reach 30MPH"<<endl;
             }
 
-            n_step+=1;
+            if (reach_speed==1){
+              if (n_step>n_settle) { total_cte+=pow(cte,2);}
+
+              if ((dp[0]+dp[1]+dp[2])>tol) {
+
+                if (n_step==steps_per_it+n_settle) { //finish one iteration
+
+                  tw=pid.twiddle(tw,total_cte);
+                  p[0]=pid.getKp();
+                  p[1]=pid.getKi();
+                  p[2]=pid.getKd();
+                  dp[0]=pid.getdp();
+                  dp[1]=pid.getdi();
+                  dp[2]=pid.getdd();
+                  it+=1;
+
+                  cout <<"iternation="<<it<<" n_step="<<n_step<<" PID= ("<<p[0]<<","<<p[1]<<","<<p[2]<<" ) dp= (";
+                  cout <<dp[0]<<","<<dp[1]<<","<<dp[2]<<" ) ";
+                  total_cte=0;
+                  n_step=0;
+
+                }
+              }
+              else {
+                cout<<"Twiddle finished and the best PID is ("<<p[0]<<","<<p[1]<<","<<p[2]<<" )"<<" Please record it" <<endl;
+              }
+              //cout<<"iteration="<<it<<" n_step"<<n_step<<" total_cte="<<total_cte<<" speed="<<speed<<endl;
+              n_step+=1;
+            }
             pid.UpdateError(cte);
             steer_value = pid.TotalError();
             if (steer_value>0.4) {
               steer_value=0.4;
             }
             else if (steer_value<-0.4){
-              steer_value=-0.4;
+             steer_value=-0.4;
             }
+
+            f<<cte<<","<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<","<<steer_value<<endl;
             msgJson["steering_angle"] = steer_value;
             msgJson["throttle"] = throttle_value;
             auto msg = "42[\"steer\"," + msgJson.dump() + "]";

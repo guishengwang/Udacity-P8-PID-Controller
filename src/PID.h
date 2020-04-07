@@ -31,7 +31,7 @@ class PID {
    */
   double TotalError();
 
-  int twiddle(double best_error, double total_cte);
+  int twiddle(int tw, double total_cte);
 
   double getKp();
   double getKi();
@@ -55,6 +55,7 @@ class PID {
   double dp[3];
   int i_PID;
   int it;
+  int i_start;
   /**
    * PID Coefficients
    */ 

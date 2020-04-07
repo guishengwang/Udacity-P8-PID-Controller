@@ -1,5 +1,7 @@
 #include "PID.h"
+#include <iostream>
 
+using namespace std;
 /**
  * TODO: Complete the PID class. You may add any additional desired functions.
  */
@@ -22,11 +24,16 @@ void PID::Init(double Kp, double Ki, double Kd,double dp0, double di, double dd)
   this->best_error=0.0;
   this->i_PID=0;
   this->it=0;
+  this->i_start=0;
 
 }
 
 void PID::UpdateError(double cte) {
 
+  if(i_start==0){
+    p_error=cte;
+    i_start=100;
+  }
   d_error = cte - p_error;
   p_error = cte;
   i_error += cte;
@@ -44,19 +51,24 @@ int PID::twiddle(int tw ,double total_cte){
     //first iteration
     if (it==0) {
       best_error=total_cte;
+      p[i_PID]+=dp[i_PID];
       it+=1;
-      return 1;
+      cout<<"it==0  return 2  best_error="<<best_error<<endl;
+      return 2;
     }
     
-    // from 2nd iteration
+
     if (tw==1) {
         p[i_PID]+=dp[i_PID];
         it+=1;
+        cout<<"tw==1 return 2 best_error="<<best_error<<endl;
+
         return 2;
     }
     
     if (tw==2) {
       if (total_cte < best_error) {
+        cout<<"tw==2 return 1 total_cte="<<total_cte<<" best_error="<< best_error<<endl;
         best_error=total_cte;
         dp[i_PID]*=1.1;
         it+=1;
@@ -64,6 +76,7 @@ int PID::twiddle(int tw ,double total_cte){
         return 1;
       }
       else {
+        cout<<"tw==2 return 3 total_cte="<<total_cte<<" best_error="<< best_error<<endl;
         p[i_PID]-=2*dp[i_PID];
         return 3;
       }
@@ -72,6 +85,7 @@ int PID::twiddle(int tw ,double total_cte){
     
     if (tw==3){
       if (total_cte < best_error) {
+        cout<<"tw==3 return 1 total_cte="<<total_cte<<" best_error="<< best_error<<endl;
         best_error=total_cte;
         dp[i_PID]*=1.1;
         it+=1;
@@ -79,19 +93,16 @@ int PID::twiddle(int tw ,double total_cte){
         return 1;
       }
       else {
-        p[i_PID]+=*dp[i_PID];
+        cout<<" tw=3,return 1 total_cte="<<total_cte<<" best_error="<< best_error<<endl;
+        p[i_PID]+=dp[i_PID];
         dp[i_PID]*=0.9;
         it+=1;
         i_PID=(i_PID+1) % 3;
         return 1;
       }
     }
-    
-   // tw=1, 2nd iteration or start with new i_PID
-   // tw=2, last iteration was p[i_PID]+=dp[i_PID]
-   // tw=3, last iteration was p[i_PID]-=2*dp[i_PID]
-    
-   
+   cout<<"tw is out of range tw="<<tw<<endl;
+   return 100;
 }
 
 double PID::getKp() {
