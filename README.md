@@ -10,7 +10,7 @@
 [//]: # (Image References)
 
 [image1]: ./images/way_points.png "way points"
-[image2]: ./images/offset.png "offset"
+[image2]: ./images/offset.PNG "offset"
 [image3]: ./images/start.png "start"
 
 ###  Environment set up
@@ -68,11 +68,7 @@ Steer_value   | angle showed on simulator | angle from simulator to main.cpp
 0.2|0.44 |5.4363
 -0.2|-4.56|-4.5637
 1.0| 25 | 25, maximum steering angle
-1.1| 25 | 25, maximum steering angle
 
-Below is a screenshot if I set the steering angle to zero but the similutor will still show a anlge of 0.44 degree.
- 
-![alt text][image2]
 
 
 ### Components of a PID controller
