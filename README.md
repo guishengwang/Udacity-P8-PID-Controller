@@ -86,9 +86,9 @@ The I (integral) is to compensate the bias in the system ( the car has a bias of
 
 Before runing the magic of twiddle, I need to find out a starting point of parameter set to keep the car running inside the track. After many manual trial and based on the suggestion from Udacity knowledge base, I selected the start point as ( 0.15, 0.0005, 3) and twiddle from there.
 
-With this set of parameter, the car can finish the whole loop and but sometime the car will swing from left to right as screenshot shown as below.
+With this set of parameter, the car can finish the whole loop and but sometime the car will swing from left to right.
 
-![alt text][image3]
+
 
 
 ### PID Class and The magic of twiddle
