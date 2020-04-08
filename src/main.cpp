@@ -35,10 +35,10 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
   PID pid;
-  double p[3]  = {0.1199, 0.00002,  2.7}; //twiddle start point {0.15, 0.0005, 3}
-  double dp[3] = {0.005, 0.000002, 0.15};
+  double p[3]  = {0.13,  0.000027, 2.7};           //0.1199, 0.00002,  2.7}; //twiddle start point {0.15, 0.0005, 3}
+  double dp[3] = {0.005, 0.000002, 0.10};
   double tol = 0.002;
-  double best_p[3] = {0.1199,0.00027, 3.0}; // result from twiddle
+  double best_p[3] = {0.1199,0.000027, 2.7}; // result from twiddle
   double total_cte = 0.0;
   int tw =0; // condition of last twiddle condition
   int i_PID=0; // 0 (P), 1(I) , 2(D) 
@@ -54,15 +54,15 @@ int main() {
   double d_input;
   ofstream f;
   f.open("../output.txt");
-  f<<"cte, pid.Kp, pid.Ki,pid.Kd,p_error,i_error,d_error  "<<endl;
+  f<<"cte, speed, angle, pid.Kp, pid.Ki,pid.Kd,p_error,i_error,d_error,steer_value  "<<endl;
 
 
-  cout<<"Please input  '0' : run with Optimaized PID   '1': twiddle   '2' : input PID for manula trial"<<endl;
-  cin>>i_twiddle;
-  //i_twiddle=0;
+  //cout<<"Please input  '0' : run with Optimaized PID   '1': twiddle   '2' : input PID for manula trial"<<endl;
+  //cin>>i_twiddle;
+  i_twiddle=0;
   if (i_twiddle==0){
     pid.Init(best_p[0],best_p[1],best_p[2],dp[0],dp[1],dp[2]);
-    cout<<"Optimaized PID from twiddle is (" <<best_p[0]<<","<<best_p[1]<<","<<best_p[2]<<" )"<< " and see how it works!"<< endl;
+    cout<<"running with PID (" <<best_p[0]<<","<<best_p[1]<<","<<best_p[2]<<" )"<< " and see how it works!"<< endl;
   }
   else if(i_twiddle==1){
 
@@ -70,8 +70,9 @@ int main() {
     cout<<"input how many steps (msg between c++ and simulator) to per each twiddle iteration (1850 steps per loop on the track)"<<endl;
     cin>>steps_per_it;
     cout<<"start twiddle from PID (" <<p[0]<<","<<p[1]<<","<<p[2]<<" )"<< " and "<<steps_per_it<<" steps per each iteration!"<< endl;
+    cout<<"twiddle will start after speed reach 30MPH"<<endl;
 
-  }else if(i_twiddle==2){
+   }else if(i_twiddle==2){
     cout <<"running  with  fixed PID, please input P="<<endl;
     cin>>p_input;
     cout<<"please input I="<< endl;
@@ -82,6 +83,8 @@ int main() {
     cout<<"Your input is P="<<p_input<<" I="<<i_input<<" D="<<d_input<<"... manual trial begin and good luck!"<< endl;
     f<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<endl;
   }
+
+
 
   h.onMessage([&tw, &i_PID, &it, &n_settle, &n_step,&steps_per_it, &reach_speed, &f, &pid, &p, &dp,  &tol,  &total_cte, &i_twiddle, &best_p](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
@@ -108,12 +111,11 @@ int main() {
 
           if (i_twiddle ==1){
 
-
-	    if (speed>30){
-              reach_speed=1; // twiddle start after speed reach 30;
-            }
-            else {
-              cout<<"twiddle will not start until speed reach 30MPH"<<endl;
+            if(reach_speed==0){
+              if (speed>30 ){
+              reach_speed=1;
+              cout<<"twiddle start now.."<<endl;            // twiddle start after speed reach 30;
+              }
             }
 
             if (reach_speed==1){
@@ -147,14 +149,15 @@ int main() {
             }
             pid.UpdateError(cte);
             steer_value = pid.TotalError();
-            if (steer_value>0.4) {
-              steer_value=0.4;
-            }
-            else if (steer_value<-0.4){
-             steer_value=-0.4;
-            }
 
-            f<<cte<<","<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<","<<steer_value<<endl;
+           //if (steer_value>0.4) {
+            //  steer_value=0.4;
+            // }
+            //else if (steer_value<-0.4){
+            // steer_value=-0.4;
+            //}
+
+            f<<cte<<","<<speed<<","<<angle<<","<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<","<<steer_value<<endl;
             msgJson["steering_angle"] = steer_value;
             msgJson["throttle"] = throttle_value;
             auto msg = "42[\"steer\"," + msgJson.dump() + "]";
@@ -164,13 +167,14 @@ int main() {
             pid.UpdateError(cte);
             //i_step+=1;  to find out how many steps per loop
             //cout<<"i_step="<<i_step;
-            f<<cte<<","<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<endl;
             steer_value = pid.TotalError();
+            f<<cte<<","<<speed<<","<<angle<<","<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error()<<","<<steer_value<<endl;
             msgJson["steering_angle"] = steer_value;
             msgJson["throttle"] = throttle_value;
             auto msg = "42[\"steer\"," + msgJson.dump() + "]";
             cout <<" i_twiddle="<<i_twiddle<<" cte=" << cte << " Steering Value=" << steer_value;
-            cout<<" speed="<<speed<<" angle="<<angle<<"  "<< msg <<endl;
+            cout<<","<<pid.getKp()<<","<<pid.getKi()<<","<<pid.getKd()<<","<<pid.get_p_error()<<","<<pid.get_i_error()<<","<<pid.get_d_error();
+            cout<<" speed="<<speed<<" angle="<<angle<<endl;
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
           }
         }  // end "telemetry" if
